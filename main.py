@@ -77,6 +77,9 @@ def app():
     with technical_row:
         
         padding_colomn , Technical_bar_column, col3 = st.columns([0.5, 5, 0.5])  # Adjust ratio for centering
+        with padding_colomn:
+            st.markdown(f"<div style='font-size: 12px; color: gray;text-align: center;'>Version</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size: 12px; color: gray;text-align: center;'>1.0.1</div>", unsafe_allow_html=True)
         with Technical_bar_column:
             technical_daily_row1 = st.container()
             technical_4h_row2 = st.container()
@@ -92,7 +95,7 @@ def app():
             if st.session_state.technical_4h is not None:
                 _4h_support_list = st.session_state.technical_4h.get("support") or []
                 _4h_resistance_list = st.session_state.technical_4h.get("resistance") or []
-                _4h_trend = st.session_state.technical_4h.get("last_predicted_trend") or []    
+                _4h_trend = st.session_state.technical_4h.get("last_predicted_trend") or "Loading..."  
             else:
                 _4h_support_list = None  
                 _4h_resistance_list  = None    
@@ -952,7 +955,7 @@ def app():
                     with chart_2:
                         # whales_in_option_fig = plot_whales(recent_public_trades_df, min_count=2, min_avg_size=5, max_marker_size=30, showlegend=False)
                         # st.plotly_chart(whales_in_option_fig)
-                        price_vs_date = plot_price_vs_entry_date(recent_public_trades_df)
+                        price_vs_date = plot_option_price_vs_entry_date(recent_public_trades_df)
                         st.plotly_chart(price_vs_date)
                     with chart_3:
                         open_by_expiration_radar = plot_radar_chart(df_options_for_strike)
@@ -1177,10 +1180,10 @@ def app():
             with trend_col2:
                 padding , title, trend_column , price_action_column= st.columns([0.1, 0.1,0.2,0.2])
 
-                last_4h_trend = st.session_state.technical_4h.get("last_predicted_trend", 'Key not found') 
-                last_daily_trend = st.session_state.technical_daily.get("last_predicted_trend", 'Key not found')
-                last_4h_price_action = st.session_state.technical_4h.get("active_price_action", 'Key not found')
-                last_daily_price_action = st.session_state.technical_daily.get("active_price_action", 'Key not found')
+                last_4h_trend = st.session_state.technical_4h.get("last_predicted_trend") or "Loading..."  
+                last_daily_trend = st.session_state.technical_daily.get("last_predicted_trend") or []
+                last_4h_price_action = st.session_state.technical_4h.get("active_price_action") or []
+                last_daily_price_action = st.session_state.technical_daily.get("active_price_action") or []
                 if last_4h_trend == "Neutral":
                         textcolor_4h_trend = "white"
                 elif last_4h_trend == "Bullish":

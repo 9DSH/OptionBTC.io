@@ -9,8 +9,18 @@ from concurrent.futures import ThreadPoolExecutor
 
 analytics = Analytic_processing()
 
+currency = 'BTC'
 
 
+# Helper function to format large numbers
+def format_large_number(value):
+    if abs(value) >= 1e6:
+        return f"{value/1e6:.1f}M"
+    elif abs(value) >= 1e3:
+        return f"{value/1e3:.1f}k"
+    else:
+        return f"{value:.1f}"
+    
 def plot_stacked_calls_puts(df):
     """
     Plot a stacked column chart of total Calls and total Puts against Strike Price,
@@ -187,29 +197,25 @@ def plot_strike_price_vs_entry_value(filtered_df):
     return fig
 
 def plot_radar_chart(df_options_for_strike):
-    # Check if required columns exist
+    # Ensure required columns exist
     if 'Expiration_Date' not in df_options_for_strike.columns or 'Open_Interest' not in df_options_for_strike.columns:
-        print("DataFrame must contain 'expiration_date' and 'open_interest' columns.")
-        return
-
-     # Extract values
-    values = df_options_for_strike['Open_Interest'].tolist()
-
-    if not values:  # 🛑 Avoid error on empty list
+        print("DataFrame must contain 'Expiration_Date' and 'Open_Interest' columns.")
         return go.Figure()
-    # Convert 'expiration_date' to datetime
-    exp_dates = pd.to_datetime(df_options_for_strike['Expiration_Date'])
 
-    # Prepare labels:
-    # 'categories' for plotting (in original format)
+    # Sort the DataFrame by Expiration_Date in ascending order
+    df_sorted = df_options_for_strike.sort_values(by='Expiration_Date')
+
+    # Convert to datetime
+    exp_dates = pd.to_datetime(df_sorted['Expiration_Date'])
+
+    # Format for axis and display
     categories = exp_dates.dt.strftime('%m/%d/%Y').tolist()
-    # 'formatted_categories' for display (e.g., '4 July 25')
-    formatted_categories = exp_dates.dt.strftime('%#d %B').tolist()  # Use '%-d' on Unix-based systems
+    formatted_categories = exp_dates.dt.strftime('%#d %B').tolist()
 
-    # Extract values for the radar chart
-    values = df_options_for_strike['Open_Interest'].tolist()
+    # Extract values
+    values = df_sorted['Open_Interest'].tolist()
 
-    # Close the radar chart by repeating the first value
+    # Close the loop for radar chart
     values += values[:1]
     categories += categories[:1]
     formatted_categories += formatted_categories[:1]
@@ -222,24 +228,25 @@ def plot_radar_chart(df_options_for_strike):
         theta=categories,
         fill='toself',
         name='Open Interest',
-        line=dict(color='red', width=2),  # Change color of the line to red
-        hovertemplate='Open Interest: %{r}<br>Expiration Date: %{theta}<extra></extra>'  # Add hover labels
+        line=dict(color='red', width=2),
+        hovertemplate='Open Interest: %{r}<br>Expiration Date: %{theta}<extra></extra>'
     ))
 
-    # Update the layout of the radar chart
+    # Layout
     fig.update_layout(
         title='Open Interest by Expiration Date',
         polar=dict(
-            bgcolor='rgba(0,0,0,0)',  # Set plot background to black
+            bgcolor='rgba(0,0,0,0)',
             radialaxis=dict(
                 visible=True,
-                 range=[0, max(values) + 10],  # Adjust the range as necessary
+                range=[0, max(values) + 10],
             ),
             angularaxis=dict(
-                tickcolor='white',  # Color of the angular ticks
-                tickfont=dict(color='white'),  # Tick font color
-                tickvals=categories,       # Original values for proper plotting
-                ticktext=formatted_categories  # Formatted text for display
+                direction='clockwise',  # Ensure clockwise
+                tickcolor='white',
+                tickfont=dict(color='white'),
+                tickvals=categories,
+                ticktext=formatted_categories
             )
         ),
         showlegend=True
@@ -312,15 +319,6 @@ def plot_underlying_price_vs_entry_value(df, custom_price=None, custom_entry_val
         if isinstance(date_obj, datetime):
             return date_obj.strftime('%Y-%m-%d %H:%M:%S')
         return 'Invalid Date'
-
-    # Helper function to format large numbers
-    def format_large_number(value):
-        if abs(value) >= 1e6:
-            return f"{value/1e6:.1f}M"
-        elif abs(value) >= 1e3:
-            return f"{value/1e3:.1f}k"
-        else:
-            return f"{value:.1f}"
 
     # Create a scatter plot of Entry Value against Underlying Price
     fig = go.Figure()
@@ -399,23 +397,23 @@ def plot_underlying_price_vs_entry_value(df, custom_price=None, custom_entry_val
                             width=1         # Width of the border
                     )),
             name='Your Option',
-            hovertemplate='<b>Your Entry Price:</b> ' + format_large_number(custom_price)  + '<br>' +
+            hovertemplate='<b>BTC Price:</b> ' + format_large_number(custom_price)  + '<br>' +
                           '<b>Your Premium:</b> ' + format_large_number(custom_entry_value) + '<br>' +
                           '<extra></extra>'
         ))
 
     # Update layout
     fig.update_layout(
-        title='Underlying Price vs Entry Value',
-        xaxis_title='Entry Value',    
-        yaxis_title='Underlying Price',       
+        title='Your Premium vs Others',
+        xaxis_title='Premium',    
+        yaxis_title=f'{currency} Price',       
         template='plotly_dark',
         hoverlabel=dict(bgcolor='black', font_color='white')
     )
 
     return fig
 
-def plot_price_vs_entry_date(df):
+def plot_option_price_vs_entry_date(df):
     # Ensure 'Entry Date' is in datetime format
     df['Entry_Date'] = pd.to_datetime(df['Entry_Date'])
 
@@ -435,11 +433,11 @@ def plot_price_vs_entry_date(df):
         line=dict(color='white', width=2),  # White line
         marker=dict(size=8),
         hovertext=(
-            'Underlying Price: ' + buy_df['Underlying_Price'].map('{:.1f}'.format).astype(str) + '<br>' +
-            'Price (USD): ' + buy_df['Price_USD'].map('{:.1f}'.format) + '<br>' +  # Updated here
+            'Time: ' + buy_df['Entry_Date'].dt.strftime('%H:%M') + '<br>' +
+            'Price (USD): ' + buy_df['Price_USD'].apply(format_large_number) + '<br>' +  
+            'Underlying Price: ' + buy_df['Underlying_Price'].apply(format_large_number) + '<br>' +
             'Size: ' + buy_df['Size'].astype(str) + '<br>' +
-            'Side: ' + buy_df['Side'] + '<br>'  +
-            'Entry Date: ' + buy_df['Entry_Date'].dt.strftime('%Y-%m-%d %H:%M:%S') + '<br>'  # Include time
+            'Side: ' + buy_df['Side'] + '<br>' 
         ),
         hoverinfo='text',
         hoverlabel=dict(bgcolor='black', font=dict(color='white')),  # Set hover background to black
@@ -455,11 +453,11 @@ def plot_price_vs_entry_date(df):
         line=dict(color='red', width=2),  # Red line
         marker=dict(size=8),
         hovertext=(
-            'Underlying Price: ' + sell_df['Underlying_Price'].map('{:.1f}'.format).astype(str) + '<br>' +
-            'Price (USD): ' + sell_df['Price_USD'].map('{:.1f}'.format) + '<br>' +  # Updated here
+            'Time: ' + buy_df['Entry_Date'].dt.strftime('%H:%M') + '<br>' +
+            'Price (USD): ' + buy_df['Price_USD'].map('{:.1f}'.format) + '<br>' +  
+            'Underlying Price: ' + buy_df['Underlying_Price'].map('{:.1f}'.format).astype(str) + '<br>' +
             'Size: ' + sell_df['Size'].astype(str) + '<br>' +
-            'Side: ' + sell_df['Side'] + '<br>' +
-            'Entry Date: ' + sell_df['Entry_Date'].dt.strftime('%Y-%m-%d %H:%M:%S') + '<br>'   # Include time
+            'Side: ' + sell_df['Side'] + '<br>' 
         ),
         hoverinfo='text',
         hoverlabel=dict(bgcolor='black', font=dict(color='white')),  # Set hover background to black
@@ -468,7 +466,7 @@ def plot_price_vs_entry_date(df):
 
     # Update layout with transparent background
     fig.update_layout(
-        title='Option Price vs Entry Date',
+        title='Option Price in Time',
         xaxis_title='Entry Date',
         yaxis_title='Price (USD)',  # Updated y-axis label
         plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent background for the entire figure

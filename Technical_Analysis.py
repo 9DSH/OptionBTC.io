@@ -25,15 +25,18 @@ class TechnicalAnalysis:
     
     def get_technical_data(self):
         """Load historical data from CSV, fetching it if not present."""
-
+        logger.info("Checking if daily data exists and loading if available")
         if self.interval == "1d":
             if os.path.exists(self.technical_analysis_data_csv):
                 df = pd.read_csv(self.technical_analysis_data_csv)
+                logger.info(f"Loaded historical data for {self.symbol} on {self.interval} interval")
+                
                 df['date'] = pd.to_datetime(df['date'])
                 latest_date_in_data = df['date'].max().date()
-                
                 current_date = pd.Timestamp.now().date()
+
                 if current_date > latest_date_in_data:
+                    logger.info(f"Fetching new analatical for {self.interval}...")
                     self.technical_analysis_data = self.prepare_technical_data()
                     trend_insights = self.analyze_market_trend(self.technical_analysis_data)
                     return trend_insights
@@ -43,6 +46,7 @@ class TechnicalAnalysis:
             else:
                 self.technical_analysis_data = self.prepare_technical_data()
                 trend_insights = self.analyze_market_trend(self.technical_analysis_data)
+                logger.info(f"No existing data found for {self.symbol} on {self.interval} interval. Fetching new data.")
 
                 return trend_insights
          
@@ -50,14 +54,19 @@ class TechnicalAnalysis:
         elif self.interval == "4h":
             if os.path.exists(self.technical_analysis_data_csv):
                 df = pd.read_csv(self.technical_analysis_data_csv)
+                logger.info(f"Loaded historical data for {self.symbol} on {self.interval} interval")
+
                 df['date'] = pd.to_datetime(df['date'])
                 latest_datetime_in_data = df['date'].max()
 
                 latest_hour_in_data = latest_datetime_in_data.hour
                 adjusted_hour = (latest_hour_in_data + 4) % 24
                 current_hour = pd.Timestamp.now(tz=timezone.utc).hour
-                
-                if adjusted_hour > current_hour:
+                current_date = pd.Timestamp.now().date()
+                latest_date_only = pd.Timestamp(latest_datetime_in_data).date()
+
+                if adjusted_hour > current_hour or current_date > latest_date_only:
+                    logger.info(f"Fetching new analatical for {self.interval}...")
                     self.technical_analysis_data = self.prepare_technical_data()
                     trend_insights = self.analyze_market_trend(self.technical_analysis_data)
                     return trend_insights
@@ -67,6 +76,7 @@ class TechnicalAnalysis:
             else:
                 self.technical_analysis_data = self.prepare_technical_data()
                 trend_insights = self.analyze_market_trend(self.technical_analysis_data)
+                logger.info(f"No existing data found for {self.symbol} on {self.interval} interval. Fetching new data.")
 
                 return trend_insights
         
@@ -183,7 +193,7 @@ class TechnicalAnalysis:
         data["switch_komu"] = self.switch_komu(data[["senkou_span_a", "senkou_span_b"]])
         data[["price_action", "previous_price_action"]] = self.find_price_action(data)
         data["predicted_trend"] = self.predict_trend(data)
-
+ 
         # Save to CSV
         data.to_csv(self.technical_analysis_data_csv, index=False)
         logger.info(f"Technical analysis data saved to {self.technical_analysis_data_csv}")
