@@ -43,7 +43,7 @@ class Analytic_processing:
                                  risk_free_rate, 
                                  selected_option_filter):
         
-        combined_results = {'Underlying Price': results_df['Underlying Price']}
+        combined_results = {'Underlying_Price': results_df['Underlying_Price']}
         
         # Get profits for the option symbol
         option_symbol_buy_profit = results_df[f'Day {days_ahead_slider} Profit (BUY)'] if f'Day {days_ahead_slider} Profit (BUY)' in selected_option_filter else None
@@ -54,7 +54,7 @@ class Analytic_processing:
             return combined_results  # Exit early if no profits for the main option
 
         index_price_range = np.arange(40000, 141000, 1000)
-        results_dict = {'Underlying Price': index_price_range}
+        results_dict = {'Underlying_Price': index_price_range}
 
         with ProcessPoolExecutor() as executor:
             # Iterate through each combo option to calculate profits
@@ -173,7 +173,7 @@ class Analytic_processing:
         index_price_range = np.arange(lower_bound, upper_bound + 100, 100)
         
         # Initialize a dictionary to hold results
-        results_dict = {'Underlying Price': index_price_range}
+        results_dict = {'Underlying_Price': index_price_range}
 
         position_count = 0
         
@@ -183,13 +183,13 @@ class Analytic_processing:
             for _, positions in df.iterrows():
                 position_instrument = positions['Instrument']
                 position_side = positions['Side']
-                strike_price = positions['Strike Price']
-                position_type = positions['Option Type'].lower()  
-                expiration_date_str = positions['Expiration Date']
+                strike_price = positions['Strike_Price']
+                position_type = positions['Option_Type'].lower()  
+                expiration_date_str = positions['Expiration_Date']
 
                 if specific_position is not None and position_instrument != specific_position:
                     continue
-                if specific_entry_date is not None and positions['Entry Date'] != specific_entry_date:
+                if specific_entry_date is not None and positions['Entry_Date'] != specific_entry_date:
                     continue
                 if specific_strike is not None and strike_price != specific_strike:
                     continue
@@ -202,8 +202,8 @@ class Analytic_processing:
                 
                 filtered_instrument = position_instrument
                 position_size = positions['Size']
-                position_iv = positions['IV (%)']
-                position_value = positions['Price (USD)']
+                position_iv = positions['IV_Percent']
+                position_value = positions['Price_USD']
 
                 future_iv = position_iv / 100 + (change_in_iv / 100.0)
 

@@ -1000,12 +1000,13 @@ def app():
                             for instrument, side in startegy_dict.items():
                                 # Fetch option data for each instrument
                                 strategy_option_details = fetch_data.fetch_option_chain(option_symbol=instrument)
+                                print(strategy_option_details)
                                 if not strategy_option_details.empty:
                                     # Extract details safely
                                     sim_option_details = strategy_option_details.copy()  # Make a copy to avoid the warning
-                                    sim_last_price = sim_option_details['Last Price (USD)'].values[0] 
-                                    sim_bid_price = sim_option_details['Bid Price (USD)'].values[0] 
-                                    sim_ask_price = sim_option_details['Ask Price (USD)'].values[0] 
+                                    sim_last_price = sim_option_details['Last_Price_USD'].values[0] 
+                                    sim_bid_price = sim_option_details['Bid_Price_USD'].values[0] 
+                                    sim_ask_price = sim_option_details['Ask_Price_USD'].values[0] 
                                     sim_delta = sim_option_details['Delta'].values[0] 
                                     sim_gamma = sim_option_details['Gamma'].values[0]
                                     sim_theta = sim_option_details['Theta'].values[0]
@@ -1144,13 +1145,13 @@ def app():
             # Create a DataFrame with the collected inputs
             if apply_button:
                 simulation_details = pd.DataFrame({
-                    'Strike Price': [sim_strike_price],
-                    'Expiration Date': [sim_expiration_date ],
-                    'Option Type' : [sim_type],
+                    'Strike_Price': [sim_strike_price],
+                    'Expiration_Date': [sim_expiration_date ],
+                    'Option_Type' : [sim_type],
                     'Size': [sim_size],
                     'Side': [sim_side],
-                    'IV (%)': [iv_percent],
-                    'Price (USD)': [sim_price_usd]
+                    'IV_Percent': [iv_percent],
+                    'Price_USD': [sim_price_usd]
                 })
                 #simulation_details =  fetch_data.validate_datatable(simulation_details_raw, "Trade")
                 profit_fig_sim , expiration_profit_sim = plot_public_profits(simulation_details , "Public", trade_option_detail)
