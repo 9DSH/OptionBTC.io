@@ -1,0 +1,16 @@
+streamlit
+numpy
+pandas
+plotly
+scipy
+scikit-learn
+requests
+aiohttp
+openai
+yfinance
+xgboost
+lightgbm
+scikit-optimize
+SQLAlchemy
+sqlite3-binary  
+loguru

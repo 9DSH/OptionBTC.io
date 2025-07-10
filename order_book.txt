@@ -1,0 +1,47 @@
+order_book_2 = {
+    'jsonrpc': '2.0',
+    'result': {
+        'timestamp': 1739623260600,
+        'state': 'open',
+        'stats': {
+            'high': 0.0001,
+            'low': 0.0001,
+            'price_change': 0.0,
+            'volume': 22.6,
+            'volume_usd': 222.29
+        },
+        'greeks': {
+            'delta': -0.00054,
+            'gamma': 0.0,
+            'vega': 0.08773,
+            'theta': -0.45686,
+            'rho': -0.00118
+        },
+        'change_id': 88213444695,
+        'index_price': 97723.27,
+        'instrument_name': 'BTC-16FEB25-88000-P',
+        'bids': [],
+        'asks': [[0.0001, 2.9], [0.0002, 8.2], [0.001, 20.0]],
+        'last_price': 0.0001,
+        'settlement_price': 2.466e-05,
+        'min_price': 0.0001,
+        'max_price': 0.015,
+        'open_interest': 40.6,
+        'mark_price': 0.0,
+        'best_ask_price': 0.0001,
+        'best_bid_price': 0.0,
+        'interest_rate': 0.0,
+        'mark_iv': 68.82,
+        'bid_iv': 0.0,
+        'ask_iv': 91.89,
+        'underlying_price': 97751.7631,
+        'underlying_index': 'SYN.BTC-16FEB25',
+        'estimated_delivery_price': 97723.27,
+        'best_ask_amount': 2.9,
+        'best_bid_amount': 0.0
+    },
+    'usIn': 1739623260726773,
+    'usOut': 1739623260727081,
+    'usDiff': 308,
+    'testnet': False
+}
