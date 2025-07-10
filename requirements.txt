@@ -12,5 +12,4 @@ xgboost
 lightgbm
 scikit-optimize
 SQLAlchemy
-sqlite3-binary  
 loguru
